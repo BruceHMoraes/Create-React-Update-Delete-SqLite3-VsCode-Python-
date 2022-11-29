@@ -1,0 +1,123 @@
+'''
+Autor : Bruce Henrique De Moraes Moreira
+Data : (21/11/2022) até  (28/11/2022)
+si. 2 periodo.
+'''
+
+class MyCrud:
+    def __init__(self, banco):
+        import sqlite3
+        self.conexao = sqlite3.connect(banco)
+        self.cursor = self.conexao.cursor()
+    
+    def fecharBD(self):
+        self.conexao.close()
+
+    def criar_tabela(self):
+        sql = '''
+            CREATE TABLE IF NOT EXISTS Pessoas (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                cpf TEXT
+            );
+        '''
+        self.cursor.execute(sql)
+        print('tabela criada')
+    def lerBD(self):
+        sql = '''
+            SELECT * FROM Pessoas;
+        ''' 
+        self.cursor.execute(sql)
+        resultados = self.cursor.fetchall()
+        for resultado in resultados:
+            print(resultado)
+
+    def inserirBD(self, nome, cpf):
+        sql =   '''
+            INSERT INTO Pessoas (nome, cpf)
+            VALUES (?, ?);
+        '''   
+        self.cursor.execute(sql, [nome, cpf])  
+        self.conexao.commit()
+
+    def alterarBD(self, a_nome, a_cpf, a_id):
+        sql = '''
+            UPDATE Pessoas
+            SET nome = ?, cpf = ?
+            WHERE id = ?;
+        '''
+        self.cursor.execute(sql, [a_nome, a_cpf, a_id])
+        self.conexao.commit()
+
+    def deletarBD(self, d_id):
+        sql = '''
+            DELETE FROM Pessoas
+            WHERE id = ?;
+        '''
+        self.cursor.execute(sql, [d_id])
+        self.conexao.commit()
+        
+############################################################################################
+############################################################################################
+
+
+from MYCrud import MyCrud
+
+crud = MyCrud('moleza.sqlite')
+crud.criar_tabela()
+while True:
+    print('''
+    Escolha uma opção
+    1 - incluir
+    2 - ler
+    3 - alterar
+    4 - deletar
+    5 - sair
+    ''')
+    valor = input(' --->')
+    if valor == '1':
+        nome = input('entre com o seu nome: ')
+        cpf = input('entre com o seu cpf (sem pontos) : ')
+        while not len(cpf) == 11:
+            print('cpf inválido, tente novamente...')
+            cpf = input(' --->')
+        crud.inserirBD(nome, cpf)
+        print('incluido com sucesso...')
+    elif valor == '2':   
+        resultados = crud.lerBD()
+    elif valor == '3':
+        chave = input('Entre com o ID que quer alterar:  ')
+        nome = input('Entre com o nome:  ')
+        cpf= input('entre com o cpf: ')
+        while not len(cpf) == 11:
+            print('cpf inválido, tente novamente')
+            cpf = input(' --->')
+        escolha = input(f'tem certeza que deseja alterar os Dados do ID {chave}?(sim/nao)')
+        if escolha.lower() == 'sim':
+            crud.alterarBD(nome, cpf, chave)
+            print('alterado com sucesso...')
+        elif escolha.lower() == 'nao' or escolha.lower() == 'não':
+            print('Dados do ID não alterado')
+            print('retornando ao menu...')
+        else:
+            print('alterado com sucesso...')
+    elif valor == '4':
+        chave = input('Qual é o valor da chave: ')
+        escolha = input(f'tem certeza que deseja deletar o ID {chave}?(sim/nao)')
+        if escolha.lower() == 'sim':
+            crud.deletarBD(chave)
+            print('deletado com sucesso...')
+        elif escolha.lower() == 'nao' or escolha.lower() == 'não':
+            print('ID não deletado')
+            print('retornando ao menu...')
+        else:
+            print('comando inexistente')
+            print('retornando ao menu...')
+
+    else:
+        crud.fecharBD
+        print('banco fechado')
+        break    
+
+
+ 
